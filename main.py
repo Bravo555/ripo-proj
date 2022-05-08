@@ -47,10 +47,13 @@ while cap.isOpened():
         break
 
     class_ids, confidences, boxes = net.detect(frame)
-    for classid, box in zip(class_ids, boxes):
-        cv2.rectangle(frame, box, (255, 0, 0), thickness=2)
-        text = labels[classid-1] if classid <= len(labels) else str(classid)
-        cv2.putText(frame, text, box[:2],
-                    cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0))
+    for classid, confidence, box in zip(class_ids, confidences, boxes):
+        if classid == 10:
+            if confidence >= 0.7:
+                print(confidence)
+                cv2.rectangle(frame, box, (255, 0, 0), thickness=2)
+                text = labels[classid-1]
+                cv2.putText(frame, text, box[:2],
+                            cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0))
 
     cv2.imshow(video_filename, frame)
