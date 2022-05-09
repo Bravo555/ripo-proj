@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+from unittest import skip
 import cv2
 import matplotlib.pyplot as plt
 
@@ -39,6 +40,8 @@ labels = [
 found: any
 foundText: str
 framesLeft = 0
+skipFrames = 1
+counter = 0
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -47,24 +50,42 @@ while cap.isOpened():
     if ret != True:
         break
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    key = cv2.waitKey(1)
+
+    if key == ord('s'):
+        key = None
+        while key not in [ord('q'), ord('s')]:
+            key = cv2.waitKey(0)
+
+    if key == ord('q'):
         break
 
-    class_ids, confidences, boxes = net.detect(frame)
-    for classid, confidence, box in zip(class_ids, confidences, boxes):
-        if classid == 10:
-            if confidence >= 0.7:
-                found = box
-                framesLeft = 30
-                # cv2.rectangle(frame, box, (255, 0, 0), thickness=2)
-                text = labels[classid-1]
-                foundText = text
-                # cv2.putText(frame, text, box[:2],
-                #             cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0))
+    if key == ord('i'):
+        if (skipFrames < 10):
+            skipFrames += 1
+
+    if key == ord('d'):
+        if (skipFrames > 1):
+            skipFrames -= 1
+
+    if key == ord('r'):
+        skipFrames = 1
+
+    if counter % skipFrames == 0:
+        class_ids, confidences, boxes = net.detect(frame)
+        for classid, confidence, box in zip(class_ids, confidences, boxes):
+            if classid == 10:
+                if confidence >= 0.685:
+                    found = box
+                    framesLeft = 30 / skipFrames
+                    text = labels[classid-1]
+                    foundText = text
+
         if (framesLeft > 0):
             cv2.rectangle(frame, found, (255, 0, 0), thickness=2)
             cv2.putText(frame, foundText, found[:2],
                         cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0))
             framesLeft -= 1
 
-    cv2.imshow(video_filename, frame)
+        cv2.imshow(video_filename, frame)
+    counter += 1
