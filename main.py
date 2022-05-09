@@ -5,14 +5,16 @@ from unittest import skip
 import cv2
 import matplotlib.pyplot as plt
 
-if len(sys.argv) < 2:
-    print('usage: ./main.py VIDEO_FILE')
-    sys.exit(1)
+# if len(sys.argv) < 2:
+#     print('usage: ./main.py VIDEO_FILE')
+#     sys.exit(1)
 
 modelpath = 'ssd_mobilenet_v3_large_coco_2020_01_14/frozen_inference_graph.pb'
 configpath = 'ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt'
 
-video_filename = sys.argv[1]
+video_filename = 0
+if len(sys.argv) == 2:
+    video_filename = sys.argv[1]
 cap = cv2.VideoCapture(video_filename)
 
 net = cv2.dnn_DetectionModel(modelpath, configpath)
@@ -75,17 +77,16 @@ while cap.isOpened():
         class_ids, confidences, boxes = net.detect(frame)
         for classid, confidence, box in zip(class_ids, confidences, boxes):
             if classid == 10:
-                if confidence >= 0.685:
+                if confidence >= 0.65:
                     found = box
                     framesLeft = 30 / skipFrames
                     text = labels[classid-1]
                     foundText = text
+            if (framesLeft > 0):
+                cv2.rectangle(frame, found, (255, 0, 0), thickness=2)
+                cv2.putText(frame, foundText, found[:2],
+                            cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0))
+                framesLeft -= 1
 
-        if (framesLeft > 0):
-            cv2.rectangle(frame, found, (255, 0, 0), thickness=2)
-            cv2.putText(frame, foundText, found[:2],
-                        cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0))
-            framesLeft -= 1
-
-        cv2.imshow(video_filename, frame)
+        cv2.imshow(video_filename if video_filename != 0 else "Kamera", frame)
     counter += 1
