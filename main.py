@@ -36,6 +36,10 @@ labels = [
     'traffic light',
 ]
 
+found: any
+foundText: str
+framesLeft = 0
+
 while cap.isOpened():
     ret, frame = cap.read()
     frame = cv2.resize(frame, (800, 600))
@@ -43,17 +47,24 @@ while cap.isOpened():
     if ret != True:
         break
 
-    if cv2.waitKey(25) & 0xFF == ord('q'):
+    if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
     class_ids, confidences, boxes = net.detect(frame)
     for classid, confidence, box in zip(class_ids, confidences, boxes):
         if classid == 10:
             if confidence >= 0.7:
-                print(confidence)
-                cv2.rectangle(frame, box, (255, 0, 0), thickness=2)
+                found = box
+                framesLeft = 30
+                # cv2.rectangle(frame, box, (255, 0, 0), thickness=2)
                 text = labels[classid-1]
-                cv2.putText(frame, text, box[:2],
-                            cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0))
+                foundText = text
+                # cv2.putText(frame, text, box[:2],
+                #             cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0))
+        if (framesLeft > 0):
+            cv2.rectangle(frame, found, (255, 0, 0), thickness=2)
+            cv2.putText(frame, foundText, found[:2],
+                        cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0))
+            framesLeft -= 1
 
     cv2.imshow(video_filename, frame)
