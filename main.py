@@ -79,14 +79,17 @@ while cap.isOpened():
             if classid == 10:
                 if confidence >= 0.65:
                     found = box
-                    framesLeft = 30 / skipFrames
+                    # framesLeft = 30 / skipFrames
                     text = labels[classid-1]
                     foundText = text
-            if (framesLeft > 0):
-                cv2.rectangle(frame, found, (255, 0, 0), thickness=2)
-                cv2.putText(frame, foundText, found[:2],
-                            cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0))
-                framesLeft -= 1
+                    cv2.rectangle(frame, found, (255, 0, 0), thickness=2)
+                    cv2.putText(frame, foundText, found[:2],
+                                cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0))
+            # if (framesLeft > 0):
+            #     cv2.rectangle(frame, found, (255, 0, 0), thickness=2)
+            #     cv2.putText(frame, foundText, found[:2],
+            #                 cv2.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0))
+            #     framesLeft -= 1
 
         cv2.imshow(video_filename if video_filename != 0 else "Kamera", frame)
     counter += 1
